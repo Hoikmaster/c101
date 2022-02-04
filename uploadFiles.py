@@ -1,28 +1,37 @@
+import os
 import dropbox
-
+from dropbox.files import WriteMode
+#
 class TransferData:
-    def __init__(self, access_token):
-        self.access_token = access_token
-
+    def __init__(self,access_token):
+        self.access_token =  access_token
+#
     def upload_file(self, file_from, file_to):
-        """upload a file to Dropbox using API v2
-        """
         dbx = dropbox.Dropbox(self.access_token)
 
-        f =  open(file_from, 'rb')
-        dbx.files_upload(f.read(), file_to)
+            # enumerate local files recursively
+        for root, dirs, files in os.walk(file_from):
+
+            for filename in files:
+                    # construct the full local path
+                local_path = os.path.join(root, filename)
+
+                    # construct the full Dropbox path
+                relative_path = os.path.relpath(local_path, file_from)
+                dropbox_path = os.path.join(file_to, relative_path)
+                    # upload the file
+                with open(local_path, 'rb') as f:
+                    dbx.files_upload(f.read(), dropbox_path, mode=WriteMode('overwrite'))
 
 def main():
-    access_token = 'sl.A_5ySV1hxWi-QMGvXuwbXfFkHG-QJGfPmnn0X7SD_opirPlC8dP5prbrh6bp4n507_ZzWMdQIiGyqCQABe8U1HqIvERdHh4WcWPa6syUNEaLOxn43J_xjOdV5sa9rCcHVMP8j8c'
+    access_token = 'sl.BBVQ5vk2nQCSKVjy88o61tor6COD7XBcYDbUMLH5EJ_JudUR23IBbolZz5YWi1qB9ToH9XYlIZ_Ch_Bt55082jHx0FlC6aOgyjuOrXqm2-pofdrhTWUK5lh8RGD6bx5ugJnu3bCWRNXP'
     transferData = TransferData(access_token)
 
-    file_from = input("Enter the file path to transfer :")
-    file_to = input("Enter the full path to upload to dropbox :")  # The full path to upload the file to, including the file name
+    file_from = str(input("Enter the folder path to transfer : -"))
+    file_to = input("enter the full path to upload to dropbox:- ")  # This is the full path to upload the file to, including name that you wish the file to be called once uploaded.
 
     # API v2
-    transferData.upload_file(file_from, file_to)
-    print("File has been moved")
-
+    transferData.upload_file(file_from,file_to)
+    print("file has been moved !!!")
 
 main()
-    
